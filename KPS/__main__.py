@@ -35,7 +35,7 @@ VERSION = __version__
 def print_banner():
     banner = f"""
 ╔═══════════════════════════════════════════════════════════════════╗
-║                  File Streaming Bot v{VERSION}                    ║
+║                  File Streaming Bot v{VERSION}                        ║
 ╚═══════════════════════════════════════════════════════════════════╝
 """
     print(banner)
