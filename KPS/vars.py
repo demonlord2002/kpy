@@ -39,15 +39,26 @@ class Var:
     SLEEP_THRESHOLD: int = int(os.getenv("SLEEP_THRESHOLD", "600"))
     WORKERS: int = int(os.getenv("WORKERS", "8"))
 
-    # BIN_CHANNEL can now accept either int ID or string URL
-    BIN_CHANNEL_ENV = os.getenv("BIN_CHANNEL", "").strip()
+    # BIN_CHANNEL: accept numeric ID or URL
+    BIN_CHANNEL_ENV = os.getenv("BIN_CHANNEL", "-1003293810900").strip()
     if not BIN_CHANNEL_ENV:
         logger.critical("BIN_CHANNEL is required")
         raise ValueError("BIN_CHANNEL is required")
     try:
         BIN_CHANNEL: Optional[int] = int(BIN_CHANNEL_ENV)
     except ValueError:
-        BIN_CHANNEL: Optional[str] = BIN_CHANNEL_ENV  # accept URL as string
+        BIN_CHANNEL: Optional[str] = BIN_CHANNEL_ENV  # fallback to string URL
+
+    # FORCE_CHANNEL_ID: optional, numeric only
+    FORCE_CHANNEL_ID: Optional[int] = None
+    force_channel_env = os.getenv("FORCE_CHANNEL_ID", "-1003237212200").strip()
+    if force_channel_env:
+        try:
+            FORCE_CHANNEL_ID = int(force_channel_env)
+        except ValueError:
+            logger.warning(
+                f"Invalid FORCE_CHANNEL_ID '{force_channel_env}' in environment; must be a numeric ID like -1001234567890"
+            )
 
     PORT: int = int(os.getenv("PORT", "8080"))
     BIND_ADDRESS: str = os.getenv("BIND_ADDRESS", "0.0.0.0")
@@ -79,15 +90,6 @@ class Var:
     BANNED_CHANNELS: Set[int] = str_to_int_set(os.getenv("BANNED_CHANNELS", ""))
 
     MULTI_CLIENT: bool = False
-
-    # FORCE_CHANNEL_ID: optional, can be int or None
-    FORCE_CHANNEL_ID: Optional[int] = None
-    force_channel_env = os.getenv("FORCE_CHANNEL_ID", "").strip()
-    if force_channel_env:
-        try:
-            FORCE_CHANNEL_ID = int(force_channel_env)
-        except ValueError:
-            logger.warning(f"Invalid FORCE_CHANNEL_ID '{force_channel_env}' in environment; must be an integer.")
 
     # Token system
     TOKEN_ENABLED: bool = str_to_bool(os.getenv("TOKEN_ENABLED", "False"))
