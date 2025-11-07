@@ -1,6 +1,7 @@
 # KPS/utils/force_channel.py
 
 import asyncio
+from typing import Tuple, Optional
 
 from pyrogram import Client
 from pyrogram.errors import FloodWait, UserNotParticipant
@@ -11,18 +12,20 @@ from KPS.utils.logger import logger
 from KPS.utils.messages import MSG_COMMUNITY_CHANNEL
 from KPS.vars import Var
 
-_force_link = None
-_force_title = None
+_force_link: Optional[str] = None
+_force_title: Optional[str] = None
 
-async def get_force_info(bot: Client):
+
+async def get_force_info(bot: Client) -> Tuple[Optional[str], Optional[str]]:
+    """Get invite link and title of the force channel"""
     global _force_link, _force_title
-    
+
     if not Var.FORCE_CHANNEL_ID:
         return None, None
-    
+
     if _force_link is not None and _force_title is not None:
         return _force_link, _force_title
-    
+
     try:
         chat = await handle_flood_wait(bot.get_chat, Var.FORCE_CHANNEL_ID)
         if chat:
@@ -33,10 +36,12 @@ async def get_force_info(bot: Client):
         logger.error(f"Force channel error: {e}", exc_info=True)
         return None, None
 
-async def force_channel_check(client: Client, message: Message):
+
+async def force_channel_check(client: Client, message: Message) -> bool:
+    """Check if user is a member of the force channel"""
     if not Var.FORCE_CHANNEL_ID:
         return True
-    
+
     if message.from_user is None:
         return True
 
@@ -44,27 +49,27 @@ async def force_channel_check(client: Client, message: Message):
         while True:
             try:
                 member = await client.get_chat_member(Var.FORCE_CHANNEL_ID, message.from_user.id)
-                if member is None:
-                    logger.error(f"Failed to get chat member for {message.from_user.id} in force channel {Var.FORCE_CHANNEL_ID} after retries.")
-                    return False
-                return True
+                return True  # Success
             except FloodWait as e:
                 logger.debug(f"FloodWait in force_channel_check, sleeping for {e.value}s")
                 await asyncio.sleep(e.value)
-    except UserNotParticipant:
-        link, title = await get_force_info(client)
-        if link and title:
-            await handle_flood_wait(
-                message.reply_text,
-                MSG_COMMUNITY_CHANNEL.format(channel_title=title),
-                reply_markup=InlineKeyboardMarkup([[
-                    InlineKeyboardButton("Join", url=link)
-                ]])
-            )
-        else:
-            await handle_flood_wait(message.reply_text, "You must join the channel to use this bot.")
-        return False
+            except UserNotParticipant:
+                # User is not in the channel
+                link, title = await get_force_info(client)
+                if link and title:
+                    await handle_flood_wait(
+                        message.reply_text,
+                        MSG_COMMUNITY_CHANNEL.format(channel_title=title),
+                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Join", url=link)]])
+                    )
+                else:
+                    await handle_flood_wait(message.reply_text, "You must join the channel to use this bot.")
+                return False
     except Exception as e:
         logger.error(f"Error checking force channel: {e}", exc_info=True)
-        await handle_flood_wait(message.reply_text, "An unexpected error occurred while checking channel membership. Please try again.")
+        await handle_flood_wait(
+            message.reply_text,
+            "An unexpected error occurred while checking channel membership. Please try again."
+        )
         return False
+        
