@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from typing import Set, Optional
 from KPS.utils.logger import logger
 
+# Load environment variables
 load_dotenv("config.env")
 
 
@@ -72,12 +73,14 @@ class Var:
         logger.warning("WARNING: OWNER_ID is not set. No user will be granted owner access.")
     OWNER_USERNAME: str = os.getenv("OWNER_USERNAME", "")
 
-    FQDN: str = os.getenv("FQDN", "") or BIND_ADDRESS
-    HAS_SSL: bool = str_to_bool(os.getenv("HAS_SSL", "False"))
+    # Public URL (use FQDN, not 0.0.0.0)
+    FQDN: str = os.getenv("FQDN", "vignesh-v2-2fb2e57748ae.herokuapp.com")
+    HAS_SSL: bool = str_to_bool(os.getenv("HAS_SSL", "True"))
     PROTOCOL: str = "https" if HAS_SSL else "http"
     PORT_SEGMENT: str = "" if NO_PORT else f":{PORT}"
     URL: str = f"{PROTOCOL}://{FQDN}{PORT_SEGMENT}/"
 
+    # Bot commands
     SET_COMMANDS: bool = str_to_bool(os.getenv("SET_COMMANDS", "True"))
 
     # Database
