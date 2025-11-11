@@ -74,7 +74,7 @@ class Var:
     OWNER_USERNAME: str = os.getenv("OWNER_USERNAME", "")
 
     # Public URL (use FQDN, not 0.0.0.0)
-    FQDN: str = os.getenv("FQDN", "vignesh-v2.netlify.app")
+    FQDN: str = os.getenv("FQDN", "vignesh-v2-2fb2e57748ae.herokuapp.com")
     HAS_SSL: bool = str_to_bool(os.getenv("HAS_SSL", "True"))
     PROTOCOL: str = "https" if HAS_SSL else "http"
     PORT_SEGMENT: str = "" if NO_PORT else f":{PORT}"
@@ -114,4 +114,5 @@ class Var:
     MAX_FILES_PER_PERIOD: int = int(os.getenv("MAX_FILES_PER_PERIOD", "2"))
     RATE_LIMIT_PERIOD_MINUTES: int = int(os.getenv("RATE_LIMIT_PERIOD_MINUTES", "1"))
     MAX_QUEUE_SIZE: int = int(os.getenv("MAX_QUEUE_SIZE", "100"))
+
 
